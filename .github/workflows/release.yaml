@@ -1,0 +1,61 @@
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Require main branch
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_REF}" != "refs/heads/main" ]]; then
+            echo "Releases must run from main. Current ref: ${GITHUB_REF}" >&2
+            exit 1
+          fi
+
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Validate
+        run: pnpm check
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            pnpm release:dry-run
+          else
+            pnpm release
+          fi
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Plan, check, and generate notes without publishing
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+  id-token: write

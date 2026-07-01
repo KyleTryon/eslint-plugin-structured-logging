@@ -1,0 +1,25 @@
+.husky/
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build and test output
+lib/
+dist/
+coverage/
+.vitest/
+
+# Logs and caches
+*.log
+pnpm-debug.log*
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+
+# TypeScript
+*.tsbuildinfo
+
+# Package manager files
+pnpm-lock.yaml

@@ -1,0 +1,84 @@
+{
+	"name": "@techsquidtv/eslint-plugin-structured-logging",
+	"version": "0.0.0",
+	"description": "ESLint plugin with library-agnostic lint rules for structured logging in TypeScript.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/KyleTryon/eslint-plugin-structured-logging.git"
+	},
+	"license": "MIT",
+	"type": "module",
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./lib/index.d.ts",
+			"default": "./lib/index.js"
+		}
+	},
+	"files": [
+		"docs/",
+		"lib/",
+		"LICENSE.md",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsdown",
+		"check": "pnpm lint && pnpm format:check && pnpm knip && pnpm build && pnpm docs:rules:check && pnpm tsc && pnpm test",
+		"docs:rules": "pnpm build && eslint-doc-generator",
+		"docs:rules:check": "pnpm build && eslint-doc-generator --check true",
+		"format": "pnpm format:write",
+		"format:check": "prettier . --list-different",
+		"format:write": "prettier . --write",
+		"hooks:install": "husky",
+		"knip": "knip",
+		"lint": "eslint . --max-warnings 0",
+		"prepare": "husky",
+		"release": "node scripts/release.mjs",
+		"release:dry-run": "node scripts/release.mjs --dry-run",
+		"test": "vitest",
+		"tsc": "tsc"
+	},
+	"lint-staged": {
+		"*.{js,ts}": [
+			"eslint --fix --max-warnings 0",
+			"prettier --write"
+		],
+		"*.{json,md,yml,yaml}": "prettier --write"
+	},
+	"dependencies": {
+		"@typescript-eslint/utils": "^8.61.0"
+	},
+	"devDependencies": {
+		"@eslint/js": "10.0.1",
+		"@types/node": "25.9.1",
+		"@typescript-eslint/parser": "^8.61.0",
+		"@typescript-eslint/rule-tester": "^8.61.0",
+		"@vitest/coverage-v8": "4.1.8",
+		"@vitest/eslint-plugin": "1.6.19",
+		"console-fail-test": "0.6.1",
+		"eslint": "10.4.1",
+		"eslint-doc-generator": "^3.6.0",
+		"eslint-plugin-eslint-plugin": "^7.4.0",
+		"husky": "9.1.7",
+		"knip": "^6.16.0",
+		"lint-staged": "17.0.7",
+		"prettier": "3.8.3",
+		"tsdown": "0.22.2",
+		"typescript": "6.0.3",
+		"typescript-eslint": "8.61.0",
+		"vitest": "4.1.8"
+	},
+	"peerDependencies": {
+		"@typescript-eslint/parser": "^8.0.0",
+		"eslint": ">=9.0.0",
+		"typescript": ">=5.0.0"
+	},
+	"publishConfig": {
+		"provenance": true
+	},
+	"packageManager": "pnpm@10.4.0",
+	"engines": {
+		"node": ">=20.19.0"
+	}
+}

@@ -1,0 +1,27 @@
+jobs:
+  semantic_pull_request:
+    if: ${{ !github.event.pull_request.draft }}
+    name: Semantic Pull Request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Validate PR title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: node scripts/validate-conventional-title.mjs "$TITLE"
+
+name: Semantic Pull Request
+
+on:
+  pull_request_target:
+    types:
+      - edited
+      - opened
+      - ready_for_review
+      - reopened
+      - synchronize
+
+permissions:
+  contents: read
+  pull-requests: read
