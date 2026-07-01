@@ -44,7 +44,7 @@ jobs:
       - uses: ./.github/actions/prepare
       - run: pnpm run test --coverage
       - if: always()
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
   type_check:
     name: Type Check
     runs-on: ubuntu-latest
