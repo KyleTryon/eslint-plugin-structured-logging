@@ -1,5 +1,7 @@
 import type { TSESLint } from "@typescript-eslint/utils";
 
+import packageJson from "../package.json" with { type: "json" };
+
 import {
 	requireLoggerInlineAttributes,
 	requireLoggerMessage,
@@ -50,7 +52,7 @@ function createRecommendedRules({
 const plugin = {
 	meta: {
 		name: "@techsquidtv/eslint-plugin-structured-logging",
-		version: "0.0.0",
+		version: packageJson.version,
 	},
 	rules,
 	configs: {} as Record<string, TSESLint.FlatConfig.Config>,
