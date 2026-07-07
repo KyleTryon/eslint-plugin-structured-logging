@@ -40,8 +40,8 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0(eslint@10.6.0(jiti@2.7.0))(prettier@3.8.3)(typescript@6.0.3)
       eslint-plugin-eslint-plugin:
-        specifier: ^7.4.0
-        version: 7.4.0(eslint@10.6.0(jiti@2.7.0))
+        specifier: ^7.4.1
+        version: 7.4.1(eslint@10.6.0(jiti@2.7.0))
       husky:
         specifier: 9.1.7
         version: 9.1.7
@@ -1014,8 +1014,8 @@ packages:
       prettier:
         optional: true
 
-  eslint-plugin-eslint-plugin@7.4.0:
-    resolution: {integrity: sha512-yLFVy13SVSgGWiufaB3lGIUef6dmjBTrfYdFD0xPxBSHdrfyIonl3zGszesOXS2iYy/iVPd5ZLBKryS12s0Scg==}
+  eslint-plugin-eslint-plugin@7.4.1:
+    resolution: {integrity: sha512-qDn/je8VILWFpaDh2FAnQcvoLQmt3q0QWsBkjHF8OiECgvRWhMLazDS4igVnjxCf8GYdZCMs/SxAgYC/HjaVtQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24.0.0}
     peerDependencies:
       eslint: '>=9.0.0'
@@ -1441,6 +1441,10 @@ packages:
 
   picomatch@4.0.4:
     resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
+    engines: {node: '>=12'}
+
+  picomatch@4.0.5:
+    resolution: {integrity: sha512-RvwwcruNjI1ncT5xRakeyS9Lf8lcItv34KD+aif+VH9kduAyfYBipGh12274xtenIPZ119/R9BdTBa8gAwSh0A==}
     engines: {node: '>=12'}
 
   postcss@8.5.16:
@@ -2623,7 +2627,7 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-eslint-plugin@7.4.0(eslint@10.6.0(jiti@2.7.0)):
+  eslint-plugin-eslint-plugin@7.4.1(eslint@10.6.0(jiti@2.7.0)):
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@10.6.0(jiti@2.7.0))
       eslint: 10.6.0(jiti@2.7.0)
@@ -3072,6 +3076,8 @@ snapshots:
 
   picomatch@4.0.4: {}
 
+  picomatch@4.0.5: {}
+
   postcss@8.5.16:
     dependencies:
       nanoid: 3.3.15
@@ -3337,7 +3343,7 @@ snapshots:
   vite@8.0.16(@types/node@25.9.1)(jiti@2.7.0)(yaml@2.9.0):
     dependencies:
       lightningcss: 1.32.0
-      picomatch: 4.0.4
+      picomatch: 4.0.5
       postcss: 8.5.16
       rolldown: 1.0.3
       tinyglobby: 0.2.17
