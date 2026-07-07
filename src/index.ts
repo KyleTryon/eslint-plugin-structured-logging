@@ -4,15 +4,14 @@ import {
 	requireLoggerInlineAttributes,
 	requireLoggerMessage,
 	requireLoggerPrimitiveAttributes,
-	requireLoggerSnakeCaseDottedAttributeKeys,
+	requireLoggerScopedDotNotation,
 } from "@/rules/index";
 
 const rules = {
 	"require-logger-inline-attributes": requireLoggerInlineAttributes,
 	"require-logger-message": requireLoggerMessage,
 	"require-logger-primitive-attributes": requireLoggerPrimitiveAttributes,
-	"require-logger-snake-case-dotted-attribute-keys":
-		requireLoggerSnakeCaseDottedAttributeKeys,
+	"require-logger-scoped-dot-notation": requireLoggerScopedDotNotation,
 };
 
 type Severity = "warn" | "error";

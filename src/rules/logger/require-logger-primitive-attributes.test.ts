@@ -31,6 +31,38 @@ ruleTester.run(
 				name: "non-inline attrs are ignored by primitive rule",
 				code: `logger.info("msg", attrs);`,
 			},
+			{
+				name: "Sentry logger object path",
+				code: `Sentry.logger.info("msg", { user_id: 1 });`,
+				options: [{ allowedLoggerObjects: ["Sentry.logger"] }],
+			},
+			{
+				name: "Pino attributes-first logger call",
+				code: `logger.info({ user_id: 1 }, "msg");`,
+				options: [{ attributesFirstLoggerIdentifiers: ["logger"] }],
+			},
+			{
+				name: "LogTape category logger call",
+				code: `log.info("msg", { user_id: 1 });`,
+			},
+			{
+				name: "Winston attributes-first custom level method",
+				code: `logger.http({ request_id: requestId }, "msg");`,
+				options: [
+					{
+						attributesFirstLoggerIdentifiers: ["logger"],
+						levelMethods: [
+							"error",
+							"warn",
+							"info",
+							"http",
+							"verbose",
+							"debug",
+							"silly",
+						],
+					},
+				],
+			},
 		],
 		invalid: [
 			{
@@ -64,6 +96,30 @@ ruleTester.run(
 				name: "unknown value with disallowUnknownAttributeValues: true",
 				code: `logger.info("msg", { request_id: requestId });`,
 				options: [{ disallowUnknownAttributeValues: true }],
+				errors: [{ messageId: "primitiveAttributeValue" }],
+			},
+			{
+				name: "Pino attributes-first nested object value",
+				code: `logger.info({ meta: { nested: true } }, "msg");`,
+				options: [{ attributesFirstLoggerIdentifiers: ["logger"] }],
+				errors: [{ messageId: "primitiveAttributeValue" }],
+			},
+			{
+				name: "Winston custom level with nested object value",
+				code: `logger.verbose("msg", { meta: { nested: true } });`,
+				options: [
+					{
+						levelMethods: [
+							"error",
+							"warn",
+							"info",
+							"http",
+							"verbose",
+							"debug",
+							"silly",
+						],
+					},
+				],
 				errors: [{ messageId: "primitiveAttributeValue" }],
 			},
 		],

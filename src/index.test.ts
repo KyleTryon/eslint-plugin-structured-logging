@@ -60,7 +60,7 @@ describe("plugin configs", () => {
 		const linter = new Linter({ configType: "flat" });
 
 		const messages = linter.verify(
-			`logger.info("Checkout completed", { checkout_id: id });`,
+			`logger.info("checkout.completed", { "checkout.id": id });`,
 			[plugin.configs.recommended as Linter.Config],
 			{ filename: "file.js" },
 		);
@@ -72,7 +72,7 @@ describe("plugin configs", () => {
 		const linter = new Linter({ configType: "flat" });
 
 		const messages = linter.verify(
-			`logger.info("message", { request_id: requestId });`,
+			`logger.info("request.received", { "request.id": requestId });`,
 			[plugin.configs.strict as Linter.Config],
 			{ filename: "file.js" },
 		);
