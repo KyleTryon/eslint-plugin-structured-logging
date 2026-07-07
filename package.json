@@ -54,8 +54,8 @@
 		"@types/node": "25.9.1",
 		"@typescript-eslint/parser": "^8.62.1",
 		"@typescript-eslint/rule-tester": "^8.62.1",
-		"@vitest/coverage-v8": "4.1.8",
-		"@vitest/eslint-plugin": "1.6.19",
+		"@vitest/coverage-v8": "4.1.10",
+		"@vitest/eslint-plugin": "1.6.21",
 		"console-fail-test": "0.6.1",
 		"eslint": "10.6.0",
 		"eslint-doc-generator": "^3.6.0",
@@ -67,7 +67,7 @@
 		"tsdown": "0.22.2",
 		"typescript": "6.0.3",
 		"typescript-eslint": "8.62.1",
-		"vitest": "4.1.8"
+		"vitest": "4.1.10"
 	},
 	"peerDependencies": {
 		"@typescript-eslint/parser": "^8.0.0",
