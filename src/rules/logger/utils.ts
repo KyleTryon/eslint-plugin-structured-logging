@@ -2,8 +2,8 @@ import { AST_NODE_TYPES, TSESTree } from "@typescript-eslint/utils";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-/** Matches a single lowercase snake_case attribute-key segment. */
-export const SNAKE_CASE_SEGMENT_RE = /^[a-z][a-z0-9_]*$/;
+/** Matches a single lowercase snake_case dotted-name segment. */
+export const DOTTED_SNAKE_CASE_SEGMENT_RE = /^[a-z][a-z0-9_]*$/;
 
 /**
  * Default logger severity methods matched as level calls. Covers the level

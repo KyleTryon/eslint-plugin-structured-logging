@@ -28,6 +28,9 @@ jobs:
       - name: Validate
         run: pnpm check
 
+      - name: Prepare npm trusted publishing
+        run: npm install --global npm@^11.5.1
+
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
@@ -35,7 +38,7 @@ jobs:
 
       - name: Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 

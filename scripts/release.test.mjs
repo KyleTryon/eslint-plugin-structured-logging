@@ -3,6 +3,7 @@ import {
 	chmodSync,
 	mkdtempSync,
 	mkdirSync,
+	readFileSync,
 	rmSync,
 	writeFileSync,
 } from "node:fs";
@@ -41,15 +42,47 @@ function createReleaseFixture() {
 	const directory = mkdtempSync(
 		path.join(tmpdir(), "structured-logging-eslint-release-"),
 	);
+	const remoteDirectory = `${directory}-remote.git`;
 	const binDirectory = path.join(directory, "bin");
 
 	mkdirSync(binDirectory);
 
 	writeFileSync(
 		path.join(binDirectory, "pnpm"),
-		'#!/usr/bin/env sh\nprintf \'%s\\n\' "$@" >> "$PNPM_CALLS"\n',
+		[
+			"#!/usr/bin/env sh",
+			'printf \'pnpm %s\\n\' "$*" >> "$RELEASE_CALLS"',
+			'printf \'%s\\n\' "$@" >> "$PNPM_CALLS"',
+			"",
+		].join("\n"),
 	);
 	chmodSync(path.join(binDirectory, "pnpm"), 0o755);
+
+	writeFileSync(
+		path.join(binDirectory, "npm"),
+		[
+			"#!/usr/bin/env sh",
+			'printf \'npm %s\\n\' "$*" >> "$RELEASE_CALLS"',
+			'if [ "$1" = "view" ]; then exit 0; fi',
+			'if [ "$1" = "publish" ]; then printf \'%s\\n\' "$@" >> "$NPM_CALLS"; exit 0; fi',
+			"exit 1",
+			"",
+		].join("\n"),
+	);
+	chmodSync(path.join(binDirectory, "npm"), 0o755);
+
+	writeFileSync(
+		path.join(binDirectory, "gh"),
+		[
+			"#!/usr/bin/env sh",
+			'printf \'%s\\n\' "$*" >> "$GH_CALLS"',
+			'if [ "$1" = "release" ] && [ "$2" = "view" ]; then exit 1; fi',
+			'if [ "$1" = "release" ] && [ "$2" = "create" ]; then exit 0; fi',
+			"exit 1",
+			"",
+		].join("\n"),
+	);
+	chmodSync(path.join(binDirectory, "gh"), 0o755);
 
 	writePackageJson(path.join(directory, "package.json"), {
 		name: "@techsquidtv/eslint-plugin-structured-logging",
@@ -65,11 +98,22 @@ function createReleaseFixture() {
 	run("git", ["commit", "-m", "chore: initial setup"], {
 		cwd: directory,
 	});
+	run("git", ["branch", "-M", "main"], { cwd: directory });
 	run("git", ["tag", "-a", "v1.0.0", "-m", "release"], {
 		cwd: directory,
 	});
+	run("git", ["init", "--bare", remoteDirectory]);
+	run("git", ["remote", "add", "origin", remoteDirectory], { cwd: directory });
+	run("git", ["push", "-u", "origin", "main", "--follow-tags"], {
+		cwd: directory,
+	});
 
-	return { binDirectory, directory };
+	return { binDirectory, directory, remoteDirectory };
+}
+
+function removeReleaseFixture(fixture) {
+	rmSync(fixture.directory, { force: true, recursive: true });
+	rmSync(fixture.remoteDirectory, { force: true, recursive: true });
 }
 
 function commitAll(directory, message) {
@@ -78,16 +122,46 @@ function commitAll(directory, message) {
 	run("git", ["commit", "-m", message], { cwd: directory });
 }
 
-function releaseDryRun(fixture) {
-	return spawnSync(process.execPath, [script, "--dry-run"], {
+function release(fixture, args = []) {
+	return spawnSync(process.execPath, [script, ...args], {
 		cwd: fixture.directory,
 		encoding: "utf8",
 		env: {
 			...process.env,
 			PATH: `${fixture.binDirectory}${path.delimiter}${process.env.PATH}`,
+			GH_CALLS: path.join(fixture.directory, "gh-calls.txt"),
+			NPM_CALLS: path.join(fixture.directory, "npm-calls.txt"),
 			PNPM_CALLS: path.join(fixture.directory, "pnpm-calls.txt"),
+			RELEASE_CALLS: path.join(fixture.directory, "release-calls.txt"),
 		},
 	});
+}
+
+function releaseDryRun(fixture) {
+	return release(fixture, ["--dry-run"]);
+}
+
+function getReleaseCalls(fixture) {
+	return readFileSync(path.join(fixture.directory, "release-calls.txt"), "utf8")
+		.trim()
+		.split("\n");
+}
+
+function expectBuildBeforePublish(fixture) {
+	const releaseCalls = getReleaseCalls(fixture);
+	const buildIndex = releaseCalls.indexOf("pnpm build");
+	const publishIndex = releaseCalls.findIndex((call) =>
+		call.startsWith("npm publish"),
+	);
+
+	expect(buildIndex).toBeGreaterThanOrEqual(0);
+	expect(publishIndex).toBeGreaterThan(buildIndex);
+}
+
+function getGitHubCalls(fixture) {
+	return readFileSync(path.join(fixture.directory, "gh-calls.txt"), "utf8")
+		.trim()
+		.split("\n");
 }
 
 describe("release", () => {
@@ -103,8 +177,9 @@ describe("release", () => {
 			expect(result.stdout).toContain(
 				"@techsquidtv/eslint-plugin-structured-logging: 1.0.0 -> 1.0.1 (patch)",
 			);
+			expectBuildBeforePublish(fixture);
 		} finally {
-			rmSync(fixture.directory, { force: true, recursive: true });
+			removeReleaseFixture(fixture);
 		}
 	});
 
@@ -134,8 +209,9 @@ describe("release", () => {
 			expect(result.stdout).toContain(
 				"@techsquidtv/eslint-plugin-structured-logging: 1.0.0 -> 1.0.1 (patch)",
 			);
+			expectBuildBeforePublish(fixture);
 		} finally {
-			rmSync(fixture.directory, { force: true, recursive: true });
+			removeReleaseFixture(fixture);
 		}
 	});
 
@@ -152,7 +228,32 @@ describe("release", () => {
 				"Release commits must use Conventional Commit subjects.",
 			);
 		} finally {
-			rmSync(fixture.directory, { force: true, recursive: true });
+			removeReleaseFixture(fixture);
+		}
+	});
+
+	test("creates a GitHub release after publishing", () => {
+		const fixture = createReleaseFixture();
+
+		try {
+			commitAll(fixture.directory, "fix: publish release notes");
+
+			const result = release(fixture);
+
+			expect(result.status).toBe(0);
+			expect(result.stdout).toContain("Release notes:");
+			expect(result.stdout).toContain("- publish release notes");
+			expectBuildBeforePublish(fixture);
+			const gitHubCalls = getGitHubCalls(fixture).join("\n");
+			expect(gitHubCalls).toContain(
+				"release view v1.0.1 --json tagName --jq .tagName",
+			);
+			expect(gitHubCalls).toContain(
+				"release create v1.0.1 --verify-tag --title @techsquidtv/eslint-plugin-structured-logging@1.0.1 --notes @techsquidtv/eslint-plugin-structured-logging@1.0.1",
+			);
+			expect(gitHubCalls).toContain("- publish release notes");
+		} finally {
+			removeReleaseFixture(fixture);
 		}
 	});
 });

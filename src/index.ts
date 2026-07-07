@@ -1,18 +1,19 @@
 import type { TSESLint } from "@typescript-eslint/utils";
 
+import packageJson from "../package.json" with { type: "json" };
+
 import {
 	requireLoggerInlineAttributes,
 	requireLoggerMessage,
 	requireLoggerPrimitiveAttributes,
-	requireLoggerSnakeCaseDottedAttributeKeys,
+	requireLoggerScopedDotNotation,
 } from "@/rules/index";
 
 const rules = {
 	"require-logger-inline-attributes": requireLoggerInlineAttributes,
 	"require-logger-message": requireLoggerMessage,
 	"require-logger-primitive-attributes": requireLoggerPrimitiveAttributes,
-	"require-logger-snake-case-dotted-attribute-keys":
-		requireLoggerSnakeCaseDottedAttributeKeys,
+	"require-logger-scoped-dot-notation": requireLoggerScopedDotNotation,
 };
 
 type Severity = "warn" | "error";
@@ -51,7 +52,7 @@ function createRecommendedRules({
 const plugin = {
 	meta: {
 		name: "@techsquidtv/eslint-plugin-structured-logging",
-		version: "0.0.0",
+		version: packageJson.version,
 	},
 	rules,
 	configs: {} as Record<string, TSESLint.FlatConfig.Config>,

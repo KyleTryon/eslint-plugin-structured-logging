@@ -258,21 +258,27 @@ function publishPackage(plan, headSha) {
 		return;
 	}
 
-	const args = [
-		"publish",
-		"--access",
-		"public",
-		"--provenance",
-		"--no-git-checks",
-	];
+	const args = ["publish", "--access", "public", "--provenance"];
 
 	if (dryRun) args.push("--dry-run");
 
-	run("pnpm", args, { stdio: "inherit" });
+	run("npm", args, { stdio: "inherit" });
+}
+
+function getReleaseTag(plan) {
+	return `v${plan.nextVersion}`;
+}
+
+function getReleaseTitle(plan) {
+	return `${plan.name}@${plan.nextVersion}`;
+}
+
+function getReleaseNotes(plan) {
+	return [getReleaseTitle(plan), "", ...plan.releaseNotes].join("\n");
 }
 
 function tagRelease(plan, headSha) {
-	const tag = `v${plan.nextVersion}`;
+	const tag = getReleaseTag(plan);
 	const existingTagSha = tryRun("git", ["rev-list", "-n", "1", tag]);
 
 	if (existingTagSha) {
@@ -286,13 +292,48 @@ function tagRelease(plan, headSha) {
 		return;
 	}
 
-	const notes = [
-		`${plan.name}@${plan.nextVersion}`,
-		"",
-		...plan.releaseNotes,
-	].join("\n");
+	run("git", ["tag", "-a", tag, "-m", getReleaseNotes(plan)], {
+		stdio: "inherit",
+	});
+}
 
-	run("git", ["tag", "-a", tag, "-m", notes], { stdio: "inherit" });
+function createGitHubRelease(plan) {
+	const tag = getReleaseTag(plan);
+	const existingReleaseTag = tryRun("gh", [
+		"release",
+		"view",
+		tag,
+		"--json",
+		"tagName",
+		"--jq",
+		".tagName",
+	]);
+
+	if (existingReleaseTag) {
+		if (existingReleaseTag !== tag) {
+			throw new Error(
+				`GitHub release lookup for ${tag} returned ${existingReleaseTag}.`,
+			);
+		}
+
+		console.log(`${tag} already has a GitHub release; skipping release.`);
+		return;
+	}
+
+	run(
+		"gh",
+		[
+			"release",
+			"create",
+			tag,
+			"--verify-tag",
+			"--title",
+			getReleaseTitle(plan),
+			"--notes",
+			getReleaseNotes(plan),
+		],
+		{ stdio: "inherit" },
+	);
 }
 
 const plan = getReleasePlan();
@@ -308,14 +349,18 @@ console.log("Release plan:");
 console.log(
 	`- ${plan.name}: ${plan.currentVersion} -> ${plan.nextVersion} (${plan.bump})`,
 );
+console.log("Release notes:");
+console.log(getReleaseNotes(plan));
 
 try {
 	writeReleasePackageJson(plan);
+	run("pnpm", ["build"], { stdio: "inherit" });
 	publishPackage(plan, headSha);
 
 	if (!dryRun) {
 		tagRelease(plan, headSha);
 		run("git", ["push", "--follow-tags"], { stdio: "inherit" });
+		createGitHubRelease(plan);
 	}
 } finally {
 	restorePackageJson(plan);

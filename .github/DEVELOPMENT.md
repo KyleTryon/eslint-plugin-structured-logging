@@ -81,6 +81,6 @@ This repository publishes the `@techsquidtv/eslint-plugin-structured-logging` np
 
 The package version is inferred from [Conventional Commit](https://www.conventionalcommits.org) titles. See [CONTRIBUTING.md](./CONTRIBUTING.md#pr-titles-and-releases) for the versioning rules.
 
-The release workflow validates the repo and runs `pnpm release`, which publishes the package through npm trusted publishing with provenance. Release tags use the version, such as `v1.2.3`.
+The release workflow validates the repo and runs `pnpm release`, which publishes the package through npm trusted publishing with provenance. It then pushes an annotated version tag, such as `v1.2.3`, and creates the matching GitHub Release from the same generated notes.
 
 The release workflow is manually dispatched from GitHub Actions. It defaults to a dry run; set `dry_run` to `false` only when publishing from `main`.

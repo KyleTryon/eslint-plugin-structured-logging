@@ -64,25 +64,25 @@ Neither config requires type information.
 🔒 Set in the `strict` configuration.\
 🔧 Automatically fixable by the [`--fix` CLI option](https://eslint.org/docs/user-guide/command-line-interface#--fix).
 
-| Name                                                                                                             | Description                                                                | ⚠️  | 💼  | 🔧  |
-| :--------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :-- | :-- | :-- |
-| [require-logger-inline-attributes](docs/rules/require-logger-inline-attributes.md)                               | Require logger attributes to be inline object literals with explicit keys. | ✅  | 🔒  |     |
-| [require-logger-message](docs/rules/require-logger-message.md)                                                   | Require logger calls to include a static text message.                     | ✅  | 🔒  |     |
-| [require-logger-primitive-attributes](docs/rules/require-logger-primitive-attributes.md)                         | Require logger attribute values to be primitives or arrays of primitives.  | ✅  | 🔒  |     |
-| [require-logger-snake-case-dotted-attribute-keys](docs/rules/require-logger-snake-case-dotted-attribute-keys.md) | Require logger attribute keys to use snake_case for each dotted segment.   | ✅  | 🔒  | 🔧  |
+| Name                                                                                     | Description                                                                | ⚠️  | 💼  | 🔧  |
+| :--------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :-- | :-- | :-- |
+| [require-logger-inline-attributes](docs/rules/require-logger-inline-attributes.md)       | Require logger attributes to be inline object literals with explicit keys. | ✅  | 🔒  |     |
+| [require-logger-message](docs/rules/require-logger-message.md)                           | Require logger calls to include a static text message.                     | ✅  | 🔒  |     |
+| [require-logger-primitive-attributes](docs/rules/require-logger-primitive-attributes.md) | Require logger attribute values to be primitives or arrays of primitives.  | ✅  | 🔒  |     |
+| [require-logger-scoped-dot-notation](docs/rules/require-logger-scoped-dot-notation.md)   | Require logger messages and attribute keys to use dotted snake case.       | ✅  | 🔒  | 🔧  |
 
 <!-- end auto-generated rules list -->
 
 ## Examples
 
-Prefer message-first logger calls with safe, searchable attributes:
+Prefer scoped event names with safe, searchable attributes:
 
 ```ts
-logger.info("Checkout completed", {
-	checkout_id: checkoutId,
-	item_count: 3,
-	is_guest: false,
-	tags: ["priority", "guest"],
+logger.info("checkout.completed", {
+	"checkout.id": checkoutId,
+	"item.count": 3,
+	"guest.is": false,
+	"tag.names": ["priority", "guest"],
 });
 ```
 
@@ -118,6 +118,13 @@ The logger rules share options for matching the logging APIs used in your codeba
 			disallowUnknownAttributeValues: false,
 		},
 	],
+	"@techsquidtv/structured-logging/require-logger-scoped-dot-notation": [
+		"warn",
+		{
+			attributeKeyFormat: "dotted-snake-case",
+			messageFormat: "dotted-snake-case",
+		},
+	],
 }
 ```
 
@@ -128,6 +135,8 @@ The logger rules share options for matching the logging APIs used in your codeba
 - `levelMethods`: Method names treated as logger level calls. Defaults to `["trace", "debug", "info", "warn", "error", "fatal"]`.
 - `ignoreDynamicLevelMethods`: Skip computed logger level methods such as `logger[level](...)` instead of matching them. Defaults to `false`.
 - `disallowUnknownAttributeValues`: Available on `@techsquidtv/structured-logging/require-logger-primitive-attributes`. Set to `true` to require statically known primitive attribute values. Defaults to `false`.
+- `attributeKeyFormat`: Available on `@techsquidtv/structured-logging/require-logger-scoped-dot-notation`. Set to `"off"` to allow non-dotted attribute keys. Defaults to `"dotted-snake-case"`.
+- `messageFormat`: Available on `@techsquidtv/structured-logging/require-logger-scoped-dot-notation`. Set to `"off"` to allow prose logger messages. Defaults to `"dotted-snake-case"`.
 
 ### Example: pino / bunyan (attributes-first)
 
