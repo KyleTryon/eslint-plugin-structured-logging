@@ -50,7 +50,7 @@
 		"eslint": "10.6.0",
 		"eslint-doc-generator": "^3.6.0",
 		"eslint-plugin-eslint-plugin": "^7.4.1",
-		"knip": "^6.16.0",
+		"knip": "^6.25.0",
 		"typescript": "6.0.3",
 		"vite-plus": "catalog:"
 	},
