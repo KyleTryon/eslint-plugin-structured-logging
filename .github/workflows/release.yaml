@@ -26,7 +26,7 @@ jobs:
         uses: ./.github/actions/prepare
 
       - name: Validate
-        run: pnpm check
+        run: vp run check
 
       - name: Prepare npm trusted publishing
         run: npm install --global npm@^11.5.1
@@ -43,9 +43,9 @@ jobs:
           set -euo pipefail
 
           if [[ "${{ inputs.dry_run }}" == "true" ]]; then
-            pnpm release:dry-run
+            vp run release:dry-run
           else
-            pnpm release
+            vp run release
           fi
 
 name: Release

@@ -5,7 +5,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/prepare
-      - run: pnpm build
+      - run: vp pack
       - run: node lib/index.js
   lint:
     name: Lint
@@ -13,36 +13,36 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/prepare
-      - run: pnpm build
-      - run: pnpm lint
-  prettier:
-    name: Prettier
+      - run: vp pack
+      - run: vp lint
+  format:
+    name: Format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/prepare
-      - run: pnpm format:check
+      - run: vp fmt . --check
   knip:
     name: Knip
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/prepare
-      - run: pnpm knip
+      - run: vp run knip
   rule_docs:
     name: Rule Docs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/prepare
-      - run: pnpm docs:rules:check
+      - run: vp run docs:rules:check
   test:
     name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/prepare
-      - run: pnpm run test --coverage
+      - run: vp test --coverage
       - if: always()
         uses: codecov/codecov-action@v7
   type_check:
@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/prepare
-      - run: pnpm tsc
+      - run: vp run tsc
 
 name: CI
 

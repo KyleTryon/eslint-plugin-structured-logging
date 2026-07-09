@@ -1,5 +1,5 @@
 import { Linter } from "eslint";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test } from "vite-plus/test";
 
 import plugin from "@/index";
 

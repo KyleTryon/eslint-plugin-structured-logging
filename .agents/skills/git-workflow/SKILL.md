@@ -84,18 +84,18 @@ Do not use `chore(deps)` when the dependency update should trigger an npm releas
 Before presenting changes as complete, prefer running:
 
 ```shell
-pnpm check
-pnpm release:dry-run
+vp check
+vp run release:dry-run
 ```
 
-For docs-only changes, at minimum run a focused Prettier check on edited markdown/YAML files.
+For docs-only changes, at minimum run a focused Vite+ format check on edited markdown/YAML files.
 
 ## Publishing
 
 The release workflow is manually dispatched from GitHub Actions.
 
 - It defaults to dry run.
-- Real publishing runs `pnpm release`.
+- Real publishing runs `vp run release`.
 - Publishing uses npm trusted publishing with provenance.
 
 ## Commit Guidance For Agents

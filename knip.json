@@ -1,5 +1,19 @@
 {
 	"$schema": "https://unpkg.com/knip@6/schema.json",
+	"entry": ["src/**/*.test.ts", "scripts/*.test.mjs"],
 	"ignore": [".eslint-doc-generatorrc.cjs"],
-	"ignoreDependencies": ["@typescript-eslint/parser"]
+	"ignoreDependencies": [
+		"@typescript-eslint/parser",
+		"eslint-plugin-eslint-plugin"
+	],
+	"ignoreExportsUsedInFile": {
+		"interface": true,
+		"type": true
+	},
+	"vite": {
+		"config": ["vite.config.ts"]
+	},
+	"vitest": {
+		"config": ["vite.config.ts"]
+	}
 }
