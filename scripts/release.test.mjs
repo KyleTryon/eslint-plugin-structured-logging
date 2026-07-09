@@ -10,7 +10,7 @@ import {
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test } from "vite-plus/test";
 
 const root = path.resolve(fileURLToPath(import.meta.url), "../..");
 const script = path.join(root, "scripts/release.mjs");
@@ -38,7 +38,7 @@ function writePackageJson(filePath, json) {
 	writeFileSync(filePath, `${JSON.stringify(json, null, "\t")}\n`);
 }
 
-function createReleaseFixture() {
+function createReleaseFixture(version = "1.0.0") {
 	const directory = mkdtempSync(
 		path.join(tmpdir(), "structured-logging-eslint-release-"),
 	);
@@ -48,15 +48,14 @@ function createReleaseFixture() {
 	mkdirSync(binDirectory);
 
 	writeFileSync(
-		path.join(binDirectory, "pnpm"),
+		path.join(binDirectory, "vp"),
 		[
 			"#!/usr/bin/env sh",
-			'printf \'pnpm %s\\n\' "$*" >> "$RELEASE_CALLS"',
-			'printf \'%s\\n\' "$@" >> "$PNPM_CALLS"',
+			'printf \'vp %s\\n\' "$*" >> "$RELEASE_CALLS"',
 			"",
 		].join("\n"),
 	);
-	chmodSync(path.join(binDirectory, "pnpm"), 0o755);
+	chmodSync(path.join(binDirectory, "vp"), 0o755);
 
 	writeFileSync(
 		path.join(binDirectory, "npm"),
@@ -86,7 +85,7 @@ function createReleaseFixture() {
 
 	writePackageJson(path.join(directory, "package.json"), {
 		name: "@techsquidtv/eslint-plugin-structured-logging",
-		version: "1.0.0",
+		version,
 	});
 
 	run("git", ["init"], { cwd: directory });
@@ -99,7 +98,7 @@ function createReleaseFixture() {
 		cwd: directory,
 	});
 	run("git", ["branch", "-M", "main"], { cwd: directory });
-	run("git", ["tag", "-a", "v1.0.0", "-m", "release"], {
+	run("git", ["tag", "-a", `v${version}`, "-m", "release"], {
 		cwd: directory,
 	});
 	run("git", ["init", "--bare", remoteDirectory]);
@@ -131,7 +130,6 @@ function release(fixture, args = []) {
 			PATH: `${fixture.binDirectory}${path.delimiter}${process.env.PATH}`,
 			GH_CALLS: path.join(fixture.directory, "gh-calls.txt"),
 			NPM_CALLS: path.join(fixture.directory, "npm-calls.txt"),
-			PNPM_CALLS: path.join(fixture.directory, "pnpm-calls.txt"),
 			RELEASE_CALLS: path.join(fixture.directory, "release-calls.txt"),
 		},
 	});
@@ -149,7 +147,7 @@ function getReleaseCalls(fixture) {
 
 function expectBuildBeforePublish(fixture) {
 	const releaseCalls = getReleaseCalls(fixture);
-	const buildIndex = releaseCalls.indexOf("pnpm build");
+	const buildIndex = releaseCalls.indexOf("vp pack");
 	const publishIndex = releaseCalls.findIndex((call) =>
 		call.startsWith("npm publish"),
 	);
@@ -165,6 +163,24 @@ function getGitHubCalls(fixture) {
 }
 
 describe("release", () => {
+	test("keeps breaking pre-1 releases on the minor track", () => {
+		const fixture = createReleaseFixture("0.0.0");
+
+		try {
+			commitAll(fixture.directory, "feat(logger)!: require dotted log names");
+
+			const result = releaseDryRun(fixture);
+
+			expect(result.status).toBe(0);
+			expect(result.stdout).toContain(
+				"@techsquidtv/eslint-plugin-structured-logging: 0.0.0 -> 0.1.0 (minor)",
+			);
+			expectBuildBeforePublish(fixture);
+		} finally {
+			removeReleaseFixture(fixture);
+		}
+	});
+
 	test("patches the package for docs changes", () => {
 		const fixture = createReleaseFixture();
 

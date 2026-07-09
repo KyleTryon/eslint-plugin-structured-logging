@@ -1,0 +1,6 @@
+packages:
+  - .
+
+catalog:
+  vite-plus: 0.2.2
+  "@vitest/coverage-v8": 4.1.9

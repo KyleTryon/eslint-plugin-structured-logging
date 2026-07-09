@@ -81,6 +81,11 @@ function bumpVersion(version, bump) {
 	}
 }
 
+function normalizeBump(version, bump) {
+	const [major] = parseVersion(version);
+	return major === 0 && bump === "major" ? "minor" : bump;
+}
+
 function maxBump(current, next) {
 	return bumpOrder.indexOf(next) > bumpOrder.indexOf(current) ? next : current;
 }
@@ -207,16 +212,17 @@ function getReleasePlan() {
 	const currentVersion = lastTag
 		? parseVersionFromTag(lastTag)
 		: packageJson.json.version;
+	const normalizedBump = normalizeBump(currentVersion, bump);
 
 	validateReleaseCommits(commits);
 
 	return {
 		...pkg,
 		...packageJson,
-		bump,
+		bump: normalizedBump,
 		currentVersion,
 		commits,
-		nextVersion: bumpVersion(currentVersion, bump),
+		nextVersion: bumpVersion(currentVersion, normalizedBump),
 		releaseNotes,
 	};
 }
@@ -354,7 +360,7 @@ console.log(getReleaseNotes(plan));
 
 try {
 	writeReleasePackageJson(plan);
-	run("pnpm", ["build"], { stdio: "inherit" });
+	run("vp", ["pack"], { stdio: "inherit" });
 	publishPackage(plan, headSha);
 
 	if (!dryRun) {

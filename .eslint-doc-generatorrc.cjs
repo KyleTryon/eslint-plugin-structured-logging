@@ -1,5 +1,3 @@
-const prettier = require("prettier");
-
 /** @type {import("eslint-doc-generator").GenerateOptions} */
 module.exports = {
 	configEmoji: [
@@ -17,9 +15,17 @@ module.exports = {
 		"configsError",
 		"fixable",
 	],
-	postprocess: async (content, pathToFile) =>
-		prettier.format(content, {
-			...(await prettier.resolveConfig(pathToFile)),
-			filepath: pathToFile,
-		}),
+	postprocess: async (content, pathToFile) => {
+		const { format } = await import("vite-plus/fmt");
+		const result = await format(pathToFile, content, {
+			printWidth: 80,
+			useTabs: true,
+		});
+
+		if (result.errors.length > 0) {
+			throw new Error(result.errors.map((error) => error.message).join("\n"));
+		}
+
+		return result.code;
+	},
 };

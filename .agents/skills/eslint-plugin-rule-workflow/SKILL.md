@@ -51,7 +51,7 @@ Cover:
 Run the docs generator instead of hand-writing generated sections:
 
 ```shell
-pnpm docs:rules
+vp run docs:rules
 ```
 
 Review `docs/rules/<rule-name>.md` and add any non-generated explanation that the rule needs.
@@ -70,13 +70,13 @@ Update `src/index.test.ts` to assert the new rule appears with the expected seve
 Prefer focused checks while iterating:
 
 ```shell
-pnpm test <rule-name>
-pnpm docs:rules:check
+vp test <rule-name>
+vp run docs:rules:check
 ```
 
 Before presenting the work as complete, prefer the repo-level checks from `.agents/skills/git-workflow/SKILL.md`:
 
 ```shell
-pnpm check
-pnpm release:dry-run
+vp check
+vp run release:dry-run
 ```

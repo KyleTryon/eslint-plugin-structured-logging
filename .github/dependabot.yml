@@ -19,7 +19,6 @@ updates:
       test:
         patterns:
           - "@vitest/*"
-          - "vitest"
     commit-message:
       prefix: "chore(deps)"
     labels:

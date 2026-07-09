@@ -11,7 +11,7 @@ export const DOTTED_SNAKE_CASE_SEGMENT_RE = /^[a-z][a-z0-9_]*$/;
  * Libraries with extra levels (for example winston's `http`/`verbose`/`silly`)
  * can extend this set via the `levelMethods` rule option.
  */
-export const DEFAULT_LEVEL_METHODS = [
+const DEFAULT_LEVEL_METHODS = [
 	"trace",
 	"debug",
 	"info",
