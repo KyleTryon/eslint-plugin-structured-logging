@@ -85,4 +85,95 @@ describe("plugin configs", () => {
 			},
 		]);
 	});
+
+	test("recommended reports realistic mixed logging issues", () => {
+		const linter = new Linter({ configType: "flat" });
+
+		const messages = linter.verify(
+			`
+function handleCheckout(checkoutId, user, attrs) {
+	logger.info("checkout.started", { "checkout.id": checkoutId });
+	logger.info(\`Checkout \${checkoutId}\`, {
+		checkoutId,
+		user: { id: user.id },
+	});
+	logger.warn("checkout.retry", attrs);
+}
+`,
+			[plugin.configs.recommended as Linter.Config],
+			{ filename: "checkout.js" },
+		);
+
+		expect(messages).toMatchObject([
+			{
+				messageId: "messageMustBeText",
+				ruleId: `${pluginName}/require-logger-message`,
+				severity: 1,
+			},
+			{
+				messageId: "dottedSnakeCaseAttributeKey",
+				ruleId: `${pluginName}/require-logger-scoped-dot-notation`,
+				severity: 1,
+			},
+			{
+				messageId: "dottedSnakeCaseAttributeKey",
+				ruleId: `${pluginName}/require-logger-scoped-dot-notation`,
+				severity: 1,
+			},
+			{
+				messageId: "primitiveAttributeValue",
+				ruleId: `${pluginName}/require-logger-primitive-attributes`,
+				severity: 1,
+			},
+			{
+				messageId: "nonInlineAttributes",
+				ruleId: `${pluginName}/require-logger-inline-attributes`,
+				severity: 1,
+			},
+		]);
+	});
+
+	test("rejects unknown shared rule options", () => {
+		const linter = new Linter({ configType: "flat" });
+
+		expect(() => {
+			linter.verify(
+				`logger.info("checkout.started");`,
+				[
+					plugin.configs.recommended as Linter.Config,
+					{
+						rules: {
+							[`${pluginName}/require-logger-message`]: [
+								"error",
+								{ unknownLoggerOption: true },
+							],
+						},
+					},
+				],
+				{ filename: "checkout.js" },
+			);
+		}).toThrow('Unexpected property "unknownLoggerOption".');
+	});
+
+	test("rejects invalid scoped-dot-notation option values", () => {
+		const linter = new Linter({ configType: "flat" });
+
+		expect(() => {
+			linter.verify(
+				`logger.info("checkout.started");`,
+				[
+					plugin.configs.recommended as Linter.Config,
+					{
+						rules: {
+							[`${pluginName}/require-logger-scoped-dot-notation`]: [
+								"error",
+								{ messageFormat: "camel-case" },
+							],
+						},
+					},
+				],
+				{ filename: "checkout.js" },
+			);
+		}).toThrow("should be equal to one of the allowed values");
+	});
 });
