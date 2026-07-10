@@ -44,7 +44,7 @@
 	"devDependencies": {
 		"@typescript-eslint/parser": "^8.63.0",
 		"@typescript-eslint/rule-tester": "^8.63.0",
-		"@types/node": "26.1.0",
+		"@types/node": "26.1.1",
 		"@vitest/coverage-v8": "catalog:",
 		"console-fail-test": "0.6.1",
 		"eslint": "10.6.0",
